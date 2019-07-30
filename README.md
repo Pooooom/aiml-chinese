@@ -1,80 +1,79 @@
-# 中文 aiml 机器人实现
+# Chinese aiml robots implement
 
-使用结巴分词和修改过的 python2 aiml 包实现
+use jieba and python2 aiml packages
 
-## 1. 使用
+## 1. how to use
 
-1. 需要 python 2 环境
+1. need python2 environment
 
-2. 使用 pip 安装依赖
+2. use pip command to install dependencies
 
    ```shell
    pip install textrank4zh
    ```
 
-   执行主程序进行对话
+   run main.py to for dialogue
 
    ```shell
    python main.py
    ```
-### 1.1 部署网页
 
-如果需要部署网页服务器，还需安装依赖
+### 1.1 deploy webpage 
+
+dependencies need to be installed if deploy webpage server
 
 ```shell
 pip install web.py
 ```
 
-   然后运行 application 程序
+   then run application program
 
    ```shell
    python run application.py
    ```
 
-   访问网页 `localhost:8080`
+   access the webpage 'localhost:8080'
 
 
+## 2. write AIML
 
+### 2.1 Custom thesaurus
 
-## 2. 编写 AIML
-
-### 2.1 自定义词库
-
-在文件 `source/user-dict` 中录入自定义词汇，以避免错误分词：
+Enter a custom vocabulary in the file `source/user-dict` to avoid incorrect word segmentation:
 
 ```
 春节联欢晚会 10 n
 ```
 
-原结巴分词包中，不要求自定义词库的词、词性标注，但是在 textrank4zh 包的实现里，需要有词性标注才能正确使用。
+In the original stuttering participle, the word and part-of-speech tagging of the custom lexicon are not required, but in the implementation of the textrank4zh package, the part-of-speech tagging is required to be used correctly.
 
-词性标注参见：[词性标记](https://gist.github.com/luw2007/6016931) 。最常用的词性为名词，标注为“n”。
+For part-of-speech tagging, see: [Word of Speech](https://gist.github.com/luw2007/6016931). The most commonly used part of speech is a noun, labeled "n".
 
-*注：自定义词典不要用 Windows 记事本保存*
+*Note: Do not save the custom dictionary with Windows Notepad*
 
-### 2.2 测试关键词提取结果
+### 2.2 Test keyword extraction results
 
-使用 split-test.py 测试语句分词、提取结果，以确定 pattern 标签中的写作内容。
+Use split-test.py to test the word segmentation and extract the results to determine what to write in the pattern tag.
 
-借助上面的自定义词库，避免一些错误；在 split-test 运行时输入 `reload` ，可以实时更新分词词典。（注意需要在保存已更改的 user-dict 文件后执行命令）
+Use the custom thesaurus above to avoid some errors; type `reload` when split-test is running to update the word breaker dictionary in real time. (Note that you need to execute the command after saving the changed user-dict file)
 
-### 2.3 同义词替换
+### 2.3 Synonym replacement
 
-去除了原 aiml 实现中的 DefaultSubs.py 和 WordSub.py，添加了文件 Sub.py 来实现功能。
+Remove DefaultSubs.py and WordSub.py from the original aiml application and add the file Sub.py to achieve the function.
 
-需要进行替换的词汇保存在 `source/subs` 中，格式为 `原词 替换词` 。
+The words that need to be replaced are stored in `source/subs` with the format of `original-word substitution-word`.
 
-比如输入：“我喜欢踢球”，关键词提取得到“我 喜欢 踢球”。根据替换词典中的规则 [喜欢 爱]，替换为“我 爱 踢球”，对应到“我 爱 踢球”的 pattern 规则，省去多余的 pattern 书写。
+For example, when input: "我喜欢踢球", we can extract the keywords "我 喜欢 踢球". According to the rules in the replacement dictionary [喜欢 爱], replaced with "我 爱 踢球". When matching with "我 爱 踢球" pattern rule, we could eliminate the need for extra pattern writing.
 
-因为减少 Trie 树的体积，这种可替换词汇策略应该优于下面的 `简化写作` 考虑使用。
+Because of the reduced size of the Trie tree, this alternative vocabulary strategy should be better than the following 'simplified writing' considerations. 
 
-但要注意：必须为完全可以相互替代的同义词添加可替换词汇，以避免引起歧义，造成后续出错。
+But we must add replaceable vocabulary for synonyms that can be substituted for each other to avoid ambiguity and subsequent errors.
 
-### 2.4 简化写作
+### 2.4 Simplified writing
 
-添加了 unfold_shorts.py 文件，该文件将辅助对 pattern 内容进行解析，以部分简化 aiml 文件的写作。
+Added the unfold_shorts.py file, which will assist in parsing the pattern content to partially simplify the writing of the aiml file.
 
-以文件 "test.aiml" 为例：
+Take the file "test.aiml" as an example:
 
 ```xml
 <category>
@@ -88,7 +87,7 @@ pip install web.py
 </category>
 ```
 
-解析生成 test-unfold.aiml
+Analytic generation test-unfold.aiml
 
 ```xml
 <category>
@@ -101,19 +100,20 @@ pip install web.py
 </category>
 ```
 
-对于 pattern 中的 fold 标签，将其中的 or 标签内容展开，与原 pattern 文字内容拼接，生成多个 category。
+For the ‘fold’ tag in the pattern, expand the ‘or’ tag content in it, and splicing with the original pattern text content to generate multiple categories.
 
-如果使用 unfold_shorts.py 对原 aiml 文件进行解析，需要 **在 `unfdld_list` 中指定目标文件，在 `startup.xml` 文件的 `learn`标签中写入 `-unfold.aiml` 后缀**。
+If you use unfold_shorts.py to parse the original aiml file, you need to specify the target file in `unfdld_list` and the `-unfold.aiml` suffix** in the `learn` tag of the `startup.xml` file.
 
-> 注意：pattern 标签中的英文内容需要为全大写
+> Note: English content in the pattern tag needs to be all uppercase
 
-### 2.5 star 用法变更
+### 2.5 star Usage change
 
-原 aiml 实现中，通配符 `*` 表示对任意一个单词的匹配。经过修改，现在的 `*` 将匹配 0 或多个单词。
+original aiml implementation, the wildcard `*` indicates a match to any word. After modification, the current `*` will match 0 or more words.
 
-与此对应的，使用 star 标签获取输入的时候，将返回空字符串（没有对应输入）、正确匹配的一个单词、使用空格分割的多个单词（规则匹配的多个输入）。
+Correspondingly, when the input is obtained using the star tag, an empty string (no corresponding input), a correctly matched word, and multiple words separated by spaces (multiple inputs matching the rule) are returned.
 
-由于程序中对于普通单词的匹配在对通配符之前，因此可以使用某些技巧。例如以下的 aiml 内容：
+Since the match for normal words in the program is before the wildcard, some tricks can be used.
+For example, the following aiml content:
 
 ```xml
   <category>
@@ -126,7 +126,7 @@ pip install web.py
   </category>
 ```
 
-可以产生对话：
+The dialogue is as follow:
 
 ```
 user：什么是
